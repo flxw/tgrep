@@ -6,7 +6,12 @@
 #include <list>
 
 struct Configuration {
-    bool  greedy;
+    enum MatchMode {MM_ARTIST, MM_RELEASE, MM_TITLE, MM_GREEDY, MM_NONE};
+
+    int match_mode;
+
+    bool greedy;
+    bool printPathOnly;
 
     int   errorCode;
 

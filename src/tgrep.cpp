@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     int mType;
     int parseResult = parseArguments(config, argc, argv);
 
-    if (parseResult) {
+    if (parseResult != 0) {
         return UserInterface::printErrorMessage(parseResult);
     }
 
@@ -32,10 +32,45 @@ int main(int argc, char** argv) {
             ++it) {
         TagLib::FileRef file(*it, false);
 
-        if (config.greedy) {
-            if (matchAgainstAll(file, config, mType)) {
-                UserInterface::printPatternMatch(*it);
+        if (!file.isNull()) {
+            mType = 0;
+            bool patternMatch = false;
+
+            if (config.match_mode == Configuration::MM_GREEDY) {
+                patternMatch = matchAgainstAll(file, config, mType);
+            } else {
+                patternMatch = true;
+
+                if ((config.match_mode & Configuration::MM_ARTIST) == Configuration::MM_ARTIST) {
+                    if (matchAgainstArtist(file, config)) {
+                        mType |= 0x100;
+                    } else {
+                        continue;
+                    }
+                }
+
+                if ((config.match_mode & Configuration::MM_RELEASE) == Configuration::MM_RELEASE) {
+                    if (matchAgainstRelease(file, config)) {
+                        mType |= 0x010;
+                    } else {
+                        continue;
+                    }
+                }
+
+                if ((config.match_mode & Configuration::MM_TITLE) == Configuration::MM_TITLE) {
+                    if (matchAgainstTitle(file, config)) {
+                        mType |= 0x001;
+                    } else {
+                        continue;
+                    }
+                }
             }
+
+            if (patternMatch) {
+                UserInterface::printPatternMatch(*it, mType, config.printPathOnly);
+            }
+        } else {
+            UserInterface::printFileError(*it);
         }
     }
 }

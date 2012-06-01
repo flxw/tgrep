@@ -14,7 +14,8 @@ public:
     static int printHelpMessage();
     static int printErrorMessage(int e);
 
-    static void printPatternMatch(const char * fname);
+    static void printPatternMatch(const char* fname, const int &mt, bool pathOnly);
+    static void printFileError(const char* fname);
 
 public:
 
