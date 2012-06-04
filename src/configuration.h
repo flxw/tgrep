@@ -6,7 +6,7 @@
 #include <list>
 
 struct Configuration {
-    enum MatchMode {MM_ARTIST, MM_RELEASE, MM_TITLE, MM_GREEDY, MM_NONE};
+    enum MatchMode {MM_ARTIST=1, MM_RELEASE, MM_TITLE, MM_GREEDY, MM_NONE};
 
     int match_mode;
 
