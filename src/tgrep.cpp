@@ -8,10 +8,14 @@
 
 using namespace std;
 
-bool matchAgainstAll(const TagLib::FileRef &fr, const struct Configuration &cfg, int &type);
-bool matchAgainstArtist(const TagLib::FileRef &fr, const struct Configuration &cfg);
-bool matchAgainstRelease(const TagLib::FileRef &fr, const struct Configuration &cfg);
-bool matchAgainstTitle(const TagLib::FileRef &fr, const struct Configuration &cfg);
+static bool matchAgainstAll(const TagLib::FileRef &fr, const struct Configuration &cfg, int &type);
+static bool matchAgainstArtist(const TagLib::FileRef &fr, const struct Configuration &cfg);
+static bool matchAgainstRelease(const TagLib::FileRef &fr, const struct Configuration &cfg);
+static bool matchAgainstTitle(const TagLib::FileRef &fr, const struct Configuration &cfg);
+
+static bool handleFileMatching(const TagLib::FileRef &file, const struct Configuration &config, int &matchType);
+
+
 
 int main(int argc, char** argv) {
 
@@ -32,41 +36,10 @@ int main(int argc, char** argv) {
             ++it) {
         TagLib::FileRef file(*it, false);
 
-        if (!file.isNull()) {
+        if (!file.isNull() && file.tag() != NULL) {
             mType = 0;
-            bool patternMatch = false;
 
-            if (config.match_mode == Configuration::MM_GREEDY) {
-                patternMatch = matchAgainstAll(file, config, mType);
-            } else {
-                patternMatch = true;
-
-                if ((config.match_mode & Configuration::MM_ARTIST) == Configuration::MM_ARTIST) {
-                    if (matchAgainstArtist(file, config)) {
-                        mType |= 0x100;
-                    } else {
-                        continue;
-                    }
-                }
-
-                if ((config.match_mode & Configuration::MM_RELEASE) == Configuration::MM_RELEASE) {
-                    if (matchAgainstRelease(file, config)) {
-                        mType |= 0x010;
-                    } else {
-                        continue;
-                    }
-                }
-
-                if ((config.match_mode & Configuration::MM_TITLE) == Configuration::MM_TITLE) {
-                    if (matchAgainstTitle(file, config)) {
-                        mType |= 0x001;
-                    } else {
-                        continue;
-                    }
-                }
-            }
-
-            if (patternMatch) {
+            if (handleFileMatching(file, config, mType)) {
                 UserInterface::printPatternMatch(*it, mType, config.printPathOnly);
             }
         } else {
@@ -102,4 +75,39 @@ bool matchAgainstRelease(const TagLib::FileRef &fr, const Configuration &cfg) {
 
 bool matchAgainstTitle(const TagLib::FileRef &fr, const Configuration &cfg) {
     return regexec(&cfg.title_pattern, fr.tag()->title().toCString(true), 0, NULL, 0) == 0;
+}
+
+static bool handleFileMatching(const TagLib::FileRef &file,
+                               const Configuration &config,
+                               int &matchType) {
+    if (config.match_mode == Configuration::MM_GREEDY) {
+        return matchAgainstAll(file, config, matchType);
+    } else {
+
+        if ((config.match_mode & Configuration::MM_ARTIST) == Configuration::MM_ARTIST) {
+            if (matchAgainstArtist(file, config)) {
+                matchType |= 0x100;
+            } else {
+                return false;
+            }
+        }
+
+        if ((config.match_mode & Configuration::MM_RELEASE) == Configuration::MM_RELEASE) {
+            if (matchAgainstRelease(file, config)) {
+                matchType |= 0x010;
+            } else {
+                return false;
+            }
+        }
+
+        if ((config.match_mode & Configuration::MM_TITLE) == Configuration::MM_TITLE) {
+            if (matchAgainstTitle(file, config)) {
+                matchType |= 0x001;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
