@@ -9,6 +9,7 @@
 int parseArguments(Configuration &cfg, int argc, char **argv) {
     cfg.match_mode         = 0;
     cfg.printPathOnly     = false;
+    cfg.recurse           = false;
     int pattern_cflags    = 0;
     char* pattern         = NULL;
     char* artist_pattern  = NULL;
@@ -28,6 +29,8 @@ int parseArguments(Configuration &cfg, int argc, char **argv) {
                     pattern_cflags |= REG_EXTENDED;
                 } else if (argv[i][j] == 'o') {
                     cfg.printPathOnly = true;
+                } else if (argv[i][j] == 'R') {
+                    cfg.recurse = true;
                 } else if (argv[i][j] == 'a') {
                     if (i+1 < argc)
                         artist_pattern = argv[++i];
@@ -66,7 +69,11 @@ int parseArguments(Configuration &cfg, int argc, char **argv) {
             // after the options, as it always comes before the path!
             pattern = argv[i];
         } else {
-            cfg.fileList.push_back(argv[i]);
+            if (cfg.recurse) {
+                cfg.fileList.push_back(argv[i]);
+            } else {
+                cfg.fileList.push_back(argv[i]);
+            }
         }
     }
 

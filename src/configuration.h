@@ -12,6 +12,7 @@ struct Configuration {
 
     bool greedy;
     bool printPathOnly;
+    bool recurse;
 
     int   errorCode;
 

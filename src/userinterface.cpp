@@ -1,6 +1,6 @@
 #include "userinterface.h"
 
-const char* UserInterface::version = "0.2";
+const char* UserInterface::version = "0.3";
 const char* UserInterface::name    = "tgrep";
 
 UserInterface::UserInterface() {
@@ -15,6 +15,7 @@ int UserInterface::printHelpMessage() {
     std::cout << " -i\t Make pattern-matching insensitive" << std::endl;
     std::cout << " -E\t Use extended regular expressions" << std::endl;
     std::cout << " -o\t Print filenames only" << std::endl;
+    std::cout << " -R\t Match recursively" << std::endl;
     std::cout << std::endl;
     std::cout << " -a PATTERN\t Use this pattern to match agains the artist tag" << std::endl;
     std::cout << " -r PATTERN\t Use this pattern to match agains the release tag" << std::endl;
